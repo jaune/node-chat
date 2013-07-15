@@ -18,9 +18,6 @@ exports.postMessage = function(req, res){
         });
         return;
     }
-
-
-
     req.services.amqp.sendMessage('channel-42', {
         agent: agent,
         sent_at: req.body.date,
@@ -68,9 +65,13 @@ exports.waitMessages = function(req, res){
         exchanges: ['channel-42']
     });
 
-    ml.on('abort', function () {
+    req.on('close', function() {
+        ml.unsubscribe();
+    });
+
+    ml.on('timeout', function () {
         res.json({
-            message: 'abort',
+            message: 'timeout',
             messages: []
         });
     });
